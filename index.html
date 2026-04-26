@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eduardo Schuman — Tráfego para Clínicas de Estética</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0A0608;
+  --bg2:     #1F1518;
+  --bg3:     #2A1A20;
+  --text:    #F2EDE8;
+  --muted:   #9C9089;
+  --accent:  #8B2942;
+  --copper:  #B8472D;
+  --gold:    #C9A96E;
+  --green:   #4A6B4F;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════
+   CORNER BRACKETS (tech decoration)
+══════════════════════════════════════ */
+.corner { position: absolute; width: 18px; height: 18px; pointer-events: none; z-index: 2; }
+.corner.tl { top: 0; left: 0;   border-top:    1px solid var(--gold); border-left:  1px solid var(--gold); }
+.corner.tr { top: 0; right: 0;  border-top:    1px solid var(--gold); border-right: 1px solid var(--gold); }
+.corner.bl { bottom:0; left: 0; border-bottom: 1px solid var(--gold); border-left:  1px solid var(--gold); }
+.corner.br { bottom:0; right:0; border-bottom: 1px solid var(--gold); border-right: 1px solid var(--gold); }
+.corner { opacity: 0.45; transition: opacity 0.4s; }
+.tech-corners:hover .corner { opacity: 0.85; }
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5vw; height: 72px;
+  background: rgba(10,6,8,0.75);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(201,169,110,0.12);
+  transition: all 0.4s ease;
+}
+nav.scrolled { height: 60px; background: rgba(10,6,8,0.95); }
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.15rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text);
+}
+.nav-logo span { color: var(--gold); }
+.nav-cta {
+  font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--bg); text-decoration: none;
+  background: var(--gold);
+  padding: 9px 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 16px rgba(201,169,110,0.25);
+}
+.nav-cta:hover { background: #dbbe84; box-shadow: 0 0 24px rgba(201,169,110,0.5); }
+
+/* ══════════════════════════════════════
+   SCROLL ANIMATIONS
+══════════════════════════════════════ */
+.reveal { opacity:0; transform:translateY(32px); transition:opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-left { opacity:0; transform:translateX(-32px); transition:opacity 0.8s ease, transform 0.8s ease; }
+.reveal-left.visible { opacity:1; transform:translateX(0); }
+.reveal-right { opacity:0; transform:translateX(32px); transition:opacity 0.8s ease, transform 0.8s ease; }
+.reveal-right.visible { opacity:1; transform:translateX(0); }
+
+/* ══════════════════════════════════════
+   SECTION HELPERS
+══════════════════════════════════════ */
+section { padding: 100px 5vw; position: relative; overflow: hidden; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+.section-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px; opacity: 0.85;
+}
+.section-tag::before { content: '— '; }
+
+.line-draw {
+  width: 0; height: 1px;
+  background: linear-gradient(90deg, var(--gold), var(--copper));
+  margin: 24px 0;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 6px rgba(201,169,110,0.4);
+}
+.line-draw.visible { width: 60px; }
+
+/* ══════════════════════════════════════
+   TYPOGRAPHY
+══════════════════════════════════════ */
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem,5vw,4rem);
+  font-weight: 400; line-height: 1.15; letter-spacing: -0.01em;
+  color: var(--text);
+}
+h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem,3.5vw,2.8rem);
+  font-weight: 400; line-height: 1.2;
+  color: var(--text);
+}
+h3 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem,2.5vw,1.9rem);
+  font-weight: 400; color: var(--text);
+}
+p { font-size: 1rem; line-height: 1.78; color: rgba(242,237,232,0.62); }
+p + p { margin-top: 20px; }
+
+/* ══════════════════════════════════════
+   BUTTONS — alto contraste
+══════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--gold);
+  color: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 17px 38px;
+  border: none; cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: all 0.35s ease;
+  box-shadow: 0 4px 24px rgba(201,169,110,0.3);
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+.btn-primary:hover::after { transform: translateX(100%); }
+.btn-primary:hover {
+  background: #dbbe84;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(201,169,110,0.55);
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent;
+  color: var(--gold);
+  font-family: var(--font-sans);
+  font-size: 0.82rem; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 16px 37px;
+  border: 1px solid var(--gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-secondary:hover { background: var(--gold); color: var(--bg); box-shadow: 0 4px 24px rgba(201,169,110,0.35); }
+
+/* ══════════════════════════════════════
+   HERO + FERRAMENTA
+══════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex; align-items: center;
+  padding: 120px 5vw 80px;
+  position: relative; overflow: hidden;
+}
+
+/* Hex dot grid */
+#hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(201,169,110,0.18) 1px, transparent 1px),
+    radial-gradient(circle, rgba(201,169,110,0.09) 1px, transparent 1px);
+  background-size: 48px 28px, 48px 28px;
+  background-position: 0 0, 24px 14px;
+  animation: hexDrift 30s linear infinite;
+}
+@keyframes hexDrift {
+  from { background-position: 0 0, 24px 14px; }
+  to { background-position: 0 280px, 24px 294px; }
+}
+
+/* Wine radial glow */
+#hero .hero-glow {
+  position: absolute; width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,41,66,0.18) 0%, transparent 68%);
+  top: -150px; right: -150px;
+  animation: orbDrift 10s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes orbDrift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-50px, 60px) scale(1.08); }
+}
+
+/* Scan beam */
+#hero .scan-beam {
+  position: absolute; width: 100%; height: 2px; left: 0; top: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(139,41,66,0.35) 40%, rgba(201,169,110,0.2) 60%, transparent 100%);
+  animation: scanDown 12s linear infinite;
+  pointer-events: none; z-index: 0;
+}
+@keyframes scanDown {
+  from { top: 0; opacity: 0; }
+  3% { opacity: 1; }
+  97% { opacity: 0.7; }
+  to { top: 100%; opacity: 0; }
+}
+
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: start;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  position: relative; z-index: 1;
+}
+
+.hero-text { padding-top: 20px; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.67rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 28px;
+  border: 1px solid rgba(201,169,110,0.15);
+  padding: 7px 16px;
+  background: rgba(201,169,110,0.04);
+}
+.hero-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: blinkDot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes blinkDot {
+  0%,100% { opacity:1; } 50% { opacity:0.3; }
+}
+
+#hero h1 { color: var(--text); font-size: clamp(2rem,3.5vw,3.2rem); margin-bottom: 28px; }
+#hero h1 em { font-style: italic; color: var(--gold); }
+#hero .subhead { color: rgba(242,237,232,0.55); font-size: 1rem; line-height: 1.75; max-width: 480px; }
+
+/* ── HUD data strip ────────────────── */
+.hero-hud {
+  display: flex; gap: 24px; margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(201,169,110,0.12);
+}
+.hud-item { font-family: var(--font-mono); font-size: 0.62rem; }
+.hud-label { color: rgba(156,144,137,0.5); letter-spacing: 0.12em; text-transform: uppercase; display: block; }
+.hud-val { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.08em; margin-top: 4px; display: block; }
+
+/* ══════════════════════════════════════
+   DIAGNOSTIC TOOL
+══════════════════════════════════════ */
+.tool-card {
+  background: rgba(31,21,24,0.9);
+  border: 1px solid rgba(201,169,110,0.18);
+  backdrop-filter: blur(16px);
+  padding: 36px;
+  position: relative;
+}
+.tool-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--gold), transparent);
+  animation: topGlow 4s ease-in-out infinite;
+}
+@keyframes topGlow { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+.tool-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.tool-header-dots { display: flex; gap: 6px; }
+.tool-header-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: block;
+}
+.tool-header-dots span:nth-child(1) { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: blinkDot 2s 0s infinite; }
+.tool-header-dots span:nth-child(2) { background: var(--copper); box-shadow: 0 0 8px var(--copper); animation: blinkDot 2s 0.6s infinite; }
+.tool-header-dots span:nth-child(3) { background: var(--gold);   box-shadow: 0 0 8px var(--gold);   animation: blinkDot 2s 1.2s infinite; }
+.tool-header-text {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--muted); letter-spacing: 0.16em; text-transform: uppercase;
+}
+
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-family: var(--font-mono);
+  font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(156,144,137,0.6); margin-bottom: 7px;
+}
+.form-group input {
+  width: 100%;
+  background: rgba(10,6,8,0.6);
+  border: 1px solid rgba(201,169,110,0.14);
+  color: var(--text);
+  font-family: var(--font-mono); font-size: 0.85rem;
+  padding: 11px 14px; outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.form-group input::placeholder { color: rgba(156,144,137,0.35); }
+.form-group input:focus {
+  border-color: rgba(201,169,110,0.5);
+  box-shadow: 0 0 0 3px rgba(201,169,110,0.07);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+#btn-diagnose { width: 100%; margin-top: 10px; padding: 16px; font-size: 0.78rem; justify-content: center; }
+
+.microcopy {
+  text-align: center; margin-top: 12px;
+  font-family: var(--font-mono); font-size: 0.6rem;
+  color: rgba(156,144,137,0.4); letter-spacing: 0.1em;
+}
+
+/* ── Analysis state ── */
+#analysis-state { display: none; }
+.analysis-header {
+  font-family: var(--font-mono); font-size: 0.7rem;
+  color: var(--muted); margin-bottom: 24px; letter-spacing: 0.1em;
+}
+.analysis-header span { color: var(--gold); }
+
+.analysis-step {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: rgba(156,144,137,0.35); transition: color 0.3s;
+}
+.analysis-step.done { color: var(--muted); }
+.analysis-step.active { color: var(--text); }
+.step-icon {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid rgba(156,144,137,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.52rem; flex-shrink: 0; transition: all 0.3s;
+}
+.analysis-step.done .step-icon { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+.analysis-step.active .step-icon {
+  border-color: var(--gold); color: var(--gold);
+  animation: stepGlow 1s ease-in-out infinite;
+}
+@keyframes stepGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(201,169,110,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(201,169,110,0); }
+}
+
+.progress-bar {
+  width: 100%; height: 2px;
+  background: rgba(201,169,110,0.08); margin: 24px 0;
+  position: relative; overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  width: 0%; transition: width 0.5s ease; position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute; right: 0; top: -3px;
+  width: 5px; height: 8px;
+  background: var(--gold); border-radius: 1px;
+  box-shadow: 0 0 10px var(--gold), 0 0 20px rgba(201,169,110,0.4);
+}
+
+/* ── Result state ── */
+#result-state { display: none; }
+.result-scroll {
+  max-height: 420px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+}
+.result-scroll::-webkit-scrollbar { width: 3px; }
+.result-scroll::-webkit-scrollbar-thumb { background: var(--accent); }
+
+.result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.result-badge {
+  background: rgba(139,41,66,0.18);
+  border: 1px solid rgba(139,41,66,0.4);
+  color: #e06080;
+  font-family: var(--font-mono); font-size: 0.63rem;
+  letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px;
+}
+
+.problem-item { padding: 13px 0; border-bottom: 1px solid rgba(201,169,110,0.08); }
+.problem-item:last-child { border-bottom: none; }
+.problem-num { font-family: var(--font-mono); font-size: 0.6rem; color: var(--gold); margin-bottom: 4px; letter-spacing: 0.1em; }
+.problem-title { font-family: var(--font-sans); font-size: 0.84rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.problem-desc { font-family: var(--font-sans); font-size: 0.77rem; color: rgba(156,144,137,0.7); line-height: 1.6; }
+
+.priority-table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+.priority-table th {
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(156,144,137,0.5); text-align: left; padding: 8px 12px;
+  border-bottom: 1px solid rgba(201,169,110,0.12);
+}
+.priority-table td {
+  font-family: var(--font-sans); font-size: 0.74rem; color: rgba(156,144,137,0.7);
+  padding: 8px 12px; border-bottom: 1px solid rgba(201,169,110,0.06);
+}
+.priority-table td:first-child {
+  color: var(--gold); font-family: var(--font-mono); font-size: 0.62rem;
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.result-cta { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(201,169,110,0.12); }
+.result-cta .btn-primary { width: 100%; justify-content: center; font-size: 0.76rem; }
+.result-cta .microcopy { margin-top: 10px; font-size: 0.58rem; }
+
+/* ══════════════════════════════════════
+   DOBRA 2 — IDENTIFICAÇÃO
+══════════════════════════════════════ */
+#identificacao { background: var(--bg2); padding: 120px 5vw; }
+
+/* Subtle circuit lines overlay */
+#identificacao::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(90deg, rgba(201,169,110,0.025) 1px, transparent 1px),
+    linear-gradient(rgba(201,169,110,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.situations-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 2px; margin-top: 56px;
+}
+.situation-card {
+  background: var(--bg3);
+  padding: 40px 36px; position: relative;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  border: 1px solid rgba(201,169,110,0.07);
+}
+.situation-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(10,6,8,0.6); }
+.situation-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; width: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  transition: width 0.5s ease;
+}
+.situation-card:hover::before { width: 100%; }
+.situation-num { font-family: var(--font-mono); font-size: 0.63rem; letter-spacing: 0.18em; color: var(--gold); margin-bottom: 16px; }
+.situation-card h3 { font-size: 1.15rem; margin-bottom: 16px; line-height: 1.35; color: var(--text); }
+.situation-card p { font-size: 0.9rem; color: rgba(156,144,137,0.75); }
+
+.section-closing {
+  margin-top: 64px; padding-top: 48px;
+  border-top: 1px solid rgba(201,169,110,0.12); text-align: center;
+}
+.section-closing p {
+  font-family: var(--font-serif); font-size: 1.3rem; font-style: italic; color: var(--text);
+}
+
+/* ══════════════════════════════════════
+   DOBRA 3 — O PROBLEMA
+══════════════════════════════════════ */
+#problema { background: var(--bg3); padding: 120px 5vw; position: relative; }
+#problema::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(201,169,110,0.08) 1px, transparent 1px),
+    radial-gradient(circle, rgba(201,169,110,0.04) 1px, transparent 1px);
+  background-size: 48px 28px, 48px 28px;
+  background-position: 0 0, 24px 14px;
+  pointer-events: none;
+}
+
+.problema-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: start; position: relative; z-index: 1;
+}
+.problema-accent {
+  position: absolute;
+  font-family: var(--font-serif); font-size: clamp(8rem,15vw,14rem);
+  font-weight: 300; color: rgba(139,41,66,0.05);
+  right: -20px; bottom: -40px; line-height: 1;
+  user-select: none; pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   DOBRA 4 — AUTORIDADE
+══════════════════════════════════════ */
+#autoridade { background: var(--bg); padding: 120px 5vw; }
+
+/* Diagonal light strip */
+#autoridade::after {
+  content: '';
+  position: absolute;
+  width: 2px; height: 200px;
+  background: linear-gradient(var(--gold), transparent);
+  opacity: 0.15;
+  top: 80px; left: 5vw;
+  pointer-events: none;
+}
+
+.autoridade-layout { display: grid; grid-template-columns: 380px 1fr; gap: 80px; align-items: start; }
+
+.photo-frame { position: relative; }
+.photo-frame::before {
+  content: '';
+  position: absolute;
+  top: 20px; left: 20px; right: -20px; bottom: -20px;
+  border: 1px solid rgba(201,169,110,0.25); z-index: 0;
+  transition: all 0.5s ease;
+}
+.photo-frame:hover::before { top: 12px; left: 12px; right: -12px; bottom: -12px; }
+.photo-frame img {
+  width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center top;
+  display: block; position: relative; z-index: 1;
+  filter: grayscale(15%) contrast(1.08) brightness(0.92);
+}
+.photo-tag {
+  position: absolute; bottom: -16px; left: 30px;
+  background: var(--gold); color: var(--bg);
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 8px 16px; z-index: 2; font-weight: 600;
+}
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 24px; margin-top: 48px; padding-top: 48px;
+  border-top: 1px solid rgba(201,169,110,0.12);
+}
+.stat { text-align: center; position: relative; }
+.stat-num {
+  font-family: var(--font-serif); font-size: 2.8rem; font-weight: 300;
+  color: var(--gold); line-height: 1; display: block;
+  text-shadow: 0 0 20px rgba(201,169,110,0.3);
+}
+.stat-label {
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--muted); margin-top: 8px; display: block;
+}
+
+/* ══════════════════════════════════════
+   DOBRA 5 — SISTEMA
+══════════════════════════════════════ */
+#sistema { background: var(--bg2); padding: 120px 5vw; }
+
+.sistema-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 56px; }
+.sistema-item {
+  background: var(--bg);
+  padding: 40px; position: relative;
+  border: 1px solid rgba(201,169,110,0.06);
+  transition: border-color 0.4s, background 0.4s;
+}
+.sistema-item:hover { border-color: rgba(201,169,110,0.2); background: rgba(10,6,8,0.7); }
+
+/* Circuit corner on hover */
+.sistema-item::after {
+  content: '';
+  position: absolute; bottom: 0; right: 0;
+  width: 0; height: 0;
+  border-left: 20px solid transparent;
+  border-bottom: 20px solid rgba(201,169,110,0.12);
+  transition: border-color 0.4s;
+}
+.sistema-item:hover::after { border-bottom-color: rgba(201,169,110,0.3); }
+
+.sistema-num { font-family: var(--font-mono); font-size: 0.63rem; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 16px; }
+.sistema-item h3 { font-size: 1.2rem; margin-bottom: 14px; color: var(--text); }
+.sistema-item p { font-size: 0.88rem; color: rgba(156,144,137,0.75); }
+
+.sistema-connector {
+  margin-top: 56px; padding: 48px 40px;
+  background: var(--bg3);
+  border: 1px solid rgba(201,169,110,0.12);
+  position: relative; overflow: hidden;
+}
+.sistema-connector::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.sistema-connector::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+}
+.sistema-connector p {
+  color: rgba(242,237,232,0.8);
+  font-family: var(--font-serif); font-size: 1.3rem; font-style: italic;
+  text-align: center; position: relative; z-index: 1;
+  max-width: 700px; margin: 0 auto;
+}
+.sistema-connector strong { color: var(--text); font-style: normal; }
+
+/* ══════════════════════════════════════
+   DOBRA 6 — REFORÇO
+══════════════════════════════════════ */
+#reforco { background: var(--bg3); padding: 120px 5vw; }
+
+.reforco-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+
+.reforco-visual {
+  position: relative; height: 400px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.tech-circle {
+  position: absolute; border-radius: 50%;
+  animation: rotateCW 20s linear infinite;
+}
+.tech-circle:nth-child(1) { width: 300px; height: 300px; border: 1px solid rgba(201,169,110,0.18); animation-duration: 22s; }
+.tech-circle:nth-child(2) { width: 220px; height: 220px; border: 1px solid rgba(139,41,66,0.25); animation-duration: 15s; animation-direction: reverse; }
+.tech-circle:nth-child(3) { width: 140px; height: 140px; border: 1px solid rgba(184,71,45,0.2); animation-duration: 9s; }
+@keyframes rotateCW { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+.tech-circle::before {
+  content: '';
+  position: absolute; width: 7px; height: 7px; border-radius: 50%;
+  top: -3.5px; left: 50%; transform: translateX(-50%);
+}
+.tech-circle:nth-child(1)::before { background: var(--gold); box-shadow: 0 0 12px var(--gold), 0 0 24px rgba(201,169,110,0.5); }
+.tech-circle:nth-child(2)::before { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.tech-circle:nth-child(3)::before { background: var(--copper); box-shadow: 0 0 12px var(--copper); }
+
+/* Cross-hair lines */
+.tech-circle:nth-child(1)::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(rgba(201,169,110,0.04) 0deg 1deg, transparent 1deg 90deg);
+  border-radius: 50%;
+}
+
+.tech-center { position: relative; z-index: 1; text-align: center; }
+.tech-center-num {
+  font-family: var(--font-serif); font-size: 2rem; font-weight: 300;
+  color: var(--gold); line-height: 1; display: block;
+  text-shadow: 0 0 20px rgba(201,169,110,0.4);
+}
+.tech-center-label {
+  font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted);
+  letter-spacing: 0.15em; text-transform: uppercase; margin-top: 10px; display: block;
+}
+
+/* ══════════════════════════════════════
+   DOBRA 7 — FILTRO
+══════════════════════════════════════ */
+#filtro { background: var(--bg); padding: 120px 5vw; position: relative; }
+#filtro::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(139,41,66,0.06) 1px, transparent 1px),
+    radial-gradient(circle, rgba(139,41,66,0.03) 1px, transparent 1px);
+  background-size: 48px 28px, 48px 28px;
+  background-position: 0 0, 24px 14px;
+}
+
+.filtro-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2px; margin-top: 48px; position: relative; z-index: 1;
+}
+.filtro-col { padding: 40px; }
+.filtro-col:first-child {
+  background: rgba(31,21,24,0.6);
+  border: 1px solid rgba(156,144,137,0.1);
+}
+.filtro-col:last-child {
+  background: rgba(139,41,66,0.07);
+  border: 1px solid rgba(139,41,66,0.18);
+}
+.filtro-col-label {
+  font-family: var(--font-mono); font-size: 0.63rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 24px; padding-bottom: 16px;
+  border-bottom: 1px solid rgba(201,169,110,0.1);
+}
+.filtro-col:first-child .filtro-col-label { color: rgba(156,144,137,0.45); }
+.filtro-col:last-child .filtro-col-label { color: var(--gold); }
+
+.filtro-list { list-style: none; }
+.filtro-list li {
+  font-family: var(--font-sans); font-size: 0.87rem;
+  color: rgba(242,237,232,0.55);
+  padding: 9px 0; border-bottom: 1px solid rgba(201,169,110,0.06);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.filtro-list li::before {
+  content: '×'; color: rgba(156,144,137,0.3);
+  font-size: 0.75rem; margin-top: 2px; flex-shrink: 0;
+}
+.filtro-col:last-child .filtro-list li::before { content: '→'; color: var(--gold); }
+
+/* ══════════════════════════════════════
+   DOBRA 8 — CTA FINAL
+══════════════════════════════════════ */
+#cta-final { background: var(--bg2); padding: 120px 5vw; text-align: center; }
+
+.cta-card {
+  max-width: 720px; margin: 0 auto; padding: 80px;
+  background: var(--bg); position: relative; overflow: hidden;
+  border: 1px solid rgba(201,169,110,0.12);
+}
+.cta-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: topGlow 4s ease-in-out infinite;
+}
+
+/* Glow orb behind CTA */
+.cta-card .cta-orb {
+  position: absolute; width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,41,66,0.12) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+
+.cta-card h2 { color: var(--text); margin-bottom: 24px; position: relative; z-index: 1; }
+.cta-card p { color: rgba(242,237,232,0.58); margin-bottom: 0; position: relative; z-index: 1; }
+
+.cta-divider {
+  width: 1px; height: 40px;
+  background: linear-gradient(var(--gold), transparent);
+  margin: 40px auto;
+  box-shadow: 0 0 8px rgba(201,169,110,0.3);
+}
+
+.cta-btns {
+  display: flex; flex-direction: column; gap: 14px; align-items: center;
+  margin-top: 40px; position: relative; z-index: 1;
+}
+
+.cta-note {
+  font-family: var(--font-mono); font-size: 0.63rem;
+  color: rgba(156,144,137,0.4); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-top: 28px; position: relative; z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  background: var(--bg);
+  border-top: 1px solid rgba(201,169,110,0.1);
+  padding: 40px 5vw;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo { font-family: var(--font-serif); font-size: 1rem; color: var(--text); font-weight: 400; letter-spacing: 0.08em; }
+.footer-logo span { color: var(--gold); }
+footer p { font-family: var(--font-mono); font-size: 0.58rem; color: rgba(156,144,137,0.3); letter-spacing: 0.12em; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  #hero h1 { font-size: 2rem; }
+  .situations-grid { grid-template-columns: 1fr; }
+  .autoridade-layout { grid-template-columns: 1fr; gap: 48px; }
+  .photo-frame { max-width: 300px; }
+  .sistema-grid { grid-template-columns: 1fr; }
+  .reforco-layout { grid-template-columns: 1fr; }
+  .reforco-visual { height: 280px; }
+  .filtro-layout { grid-template-columns: 1fr; }
+  .problema-layout { grid-template-columns: 1fr; gap: 40px; }
+  .stats-row { grid-template-columns: repeat(3,1fr); }
+  .cta-card { padding: 48px 28px; }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+  .form-grid { grid-template-columns: 1fr; }
+  .hero-hud { flex-wrap: wrap; gap: 16px; }
+}
+
+/* ══════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════ */
+.mt-24 { margin-top: 24px; }
+.mt-40 { margin-top: 40px; }
+.mt-56 { margin-top: 56px; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────────────── -->
+<nav id="nav">
+  <div class="nav-logo">Eduardo <span>Schuman</span></div>
+  <a href="#cta-final" class="nav-cta">Falar com Eduardo</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 1 — HERO + FERRAMENTA
+══════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="scan-beam"></div>
+
+  <div class="hero-inner">
+
+    <!-- Texto esquerdo -->
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Diagnóstico de tráfego · Clínicas de Estética
+      </div>
+
+      <h1>
+        Descubra em 30 segundos por que seus anúncios <em>não estão trazendo cliente de verdade.</em>
+      </h1>
+
+      <p class="subhead mt-40">
+        Diagnóstico gratuito dos anúncios ativos da sua clínica. Você preenche os dados, e eu te mostro na hora o que está atraindo curioso, o que está espantando paciente com poder de compra e o que precisa mudar pra sua agenda começar a girar.
+      </p>
+
+      <div class="hero-hud">
+        <div class="hud-item">
+          <span class="hud-label">Especialidade</span>
+          <span class="hud-val">Estética · Apenas</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Experiência</span>
+          <span class="hud-val">6 anos no nicho</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Sistema</span>
+          <span class="hud-val">Anúncio → Agendamento</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ferramenta direita -->
+    <div class="tool-card tech-corners reveal-right">
+
+      <!-- ESTADO 1: Formulário -->
+      <div id="form-state">
+        <div class="tool-header">
+          <div class="tool-header-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="tool-header-text">Diagnóstico de Anúncios // v2.4</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Seu nome</label>
+            <input type="text" id="f-nome" placeholder="Dra. Ana Souza" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp</label>
+            <input type="tel" id="f-whats" placeholder="(11) 99999-9999">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Seu e-mail</label>
+          <input type="email" id="f-email" placeholder="dra.ana@clinica.com.br">
+        </div>
+        <div class="form-group">
+          <label>@ da clínica que anuncia</label>
+          <input type="text" id="f-clinica" placeholder="@clinicaana" autocomplete="off">
+        </div>
+
+        <button class="btn-primary" id="btn-diagnose" onclick="startDiagnosis()">
+          <span>Fazer meu diagnóstico agora</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <p class="microcopy">Resultado na hora. Sem custo, sem ligação de vendedor.</p>
+      </div>
+
+      <!-- ESTADO 2: Análise animada -->
+      <div id="analysis-state">
+        <div class="analysis-header">
+          Sistema analisando perfil <span id="clinic-label">@clinica</span>...
+        </div>
+        <div class="analysis-step" id="step-1">
+          <div class="step-icon">01</div>
+          <span>Mapeando estrutura de anúncios ativos</span>
+        </div>
+        <div class="analysis-step" id="step-2">
+          <div class="step-icon">02</div>
+          <span>Analisando qualidade de copies e ganchos</span>
+        </div>
+        <div class="analysis-step" id="step-3">
+          <div class="step-icon">03</div>
+          <span>Verificando segmentação de público</span>
+        </div>
+        <div class="analysis-step" id="step-4">
+          <div class="step-icon">04</div>
+          <span>Avaliando funil de atendimento</span>
+        </div>
+        <div class="analysis-step" id="step-5">
+          <div class="step-icon">05</div>
+          <span>Consolidando diagnóstico</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <p class="microcopy" style="color:rgba(156,144,137,0.35)">Processando dados de performance...</p>
+      </div>
+
+      <!-- ESTADO 3: Resultado -->
+      <div id="result-state">
+        <div class="result-header">
+          <div class="result-badge">⚠ Problemas identificados</div>
+        </div>
+        <div class="result-scroll">
+          <div id="problems-list"></div>
+          <div style="margin-top:20px;margin-bottom:8px;">
+            <div class="result-badge" style="background:rgba(201,169,110,0.08);border-color:rgba(201,169,110,0.2);color:var(--gold);">🎯 Prioridade de melhoria</div>
+          </div>
+          <table class="priority-table" id="priority-table"></table>
+        </div>
+        <div class="result-cta">
+          <a href="#" id="whats-cta-hero" class="btn-primary" target="_blank" rel="noopener">
+            <span>Agendar call de 20 min para saber mais</span>
+          </a>
+          <p class="microcopy">Eduardo responde pessoalmente. Sem vendedor, sem script.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 2 — IDENTIFICAÇÃO
+══════════════════════════════════════════════════════════ -->
+<section id="identificacao">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-tag">Identificação</span>
+      <h2>Você provavelmente está vivendo uma dessas três situações.</h2>
+      <div class="line-draw"></div>
+    </div>
+
+    <div class="situations-grid">
+      <div class="situation-card tech-corners reveal" style="transition-delay:0.1s">
+        <div class="situation-num">// 01</div>
+        <h3>Depende só do orgânico</h3>
+        <p>Posta no feed, nos stories, mostra resultado, fala dos procedimentos. E mesmo assim a agenda depende muito de indicação ou de cliente antigo voltando. Quando o orgânico está rodando bem, alguma coisa entra. Quando não, a clínica esfria — e não tem como prever.</p>
+      </div>
+      <div class="situation-card tech-corners reveal" style="transition-delay:0.2s">
+        <div class="situation-num">// 02</div>
+        <h3>Anunciou, mas com gestor que não entende de estética</h3>
+        <p>Chegou mensagem, até. Só que foi gente fora do perfil, só pedindo "valor", gente sem poder de compra, gente que some depois do "olá". Você pagou anúncio, pagou gente pra responder, e no fim do mês olhou pra agenda e não entendeu onde foi parar o investimento.</p>
+      </div>
+      <div class="situation-card tech-corners reveal" style="transition-delay:0.3s">
+        <div class="situation-num">// 03</div>
+        <h3>Ouviu promessa de agenda lotada</h3>
+        <p>Assinou contrato, recebeu relatório, e a clínica continuou igual. Hoje você tem um pé atrás com qualquer agência que aparece, e faz total sentido.</p>
+      </div>
+    </div>
+
+    <div class="section-closing reveal">
+      <p>Se você se identificou com alguma dessas situações, vale a pena continuar lendo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 3 — O PROBLEMA
+══════════════════════════════════════════════════════════ -->
+<section id="problema">
+  <div class="container">
+    <div class="problema-layout">
+      <div class="reveal-left">
+        <span class="section-tag">O diagnóstico real</span>
+        <h2>O problema não é o Instagram. Não é o anúncio. Não é o seu procedimento.</h2>
+        <div class="line-draw"></div>
+      </div>
+      <div class="reveal-right">
+        <p>O orgânico tem um papel importante, mas ele não foi feito pra encher agenda. Foi feito pra criar relacionamento, mostrar autoridade e aquecer quem já te segue. Quando você depende só dele, vira aposta.</p>
+        <p>E o anúncio que só traz curioso? O problema raramente está na Meta. Está na oferta, no criativo, no público escolhido e, principalmente, na forma como o anúncio conversa com a pessoa do outro lado.</p>
+        <p>Porque quem procura sua clínica não está atrás só do procedimento. Está atrás de voltar a se sentir bem, de resolver algo que incomoda há tempo, de cuidar de si depois de muito tempo se deixando em segundo plano. Quando o anúncio fala só de técnica, só de preço ou só de promoção, essa pessoa passa direto.</p>
+        <p style="color:var(--gold);font-family:var(--font-serif);font-size:1.1rem;font-style:italic;">É exatamente nesse ponto que eu entro.</p>
+      </div>
+    </div>
+    <div class="problema-accent">porquê?</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 4 — AUTORIDADE
+══════════════════════════════════════════════════════════ -->
+<section id="autoridade">
+  <div class="container">
+    <div class="autoridade-layout">
+
+      <div class="reveal-left">
+        <div class="photo-frame">
+          <img src="IMG-20190928-WA0001 (1).jpg" alt="Eduardo Schuman" loading="lazy">
+          <div class="photo-tag">Eduardo Schuman</div>
+        </div>
+      </div>
+
+      <div class="reveal-right">
+        <span class="section-tag">Autoridade</span>
+        <h2>Há 6 anos, só com clínica de estética.</h2>
+        <div class="line-draw"></div>
+
+        <p>Antes de entrar pro marketing, passei 10 anos trabalhando como vendedor. Foi nesse tempo que aprendi, na prática, o que faz uma pessoa parar pra prestar atenção, criar confiança e tomar a decisão de comprar. Isso mudou completamente a forma como eu olho pra um anúncio.</p>
+
+        <p>Em 2019, fui chamado pra desenvolver a parte de suporte emocional ao paciente do Método Medida Exata, da Priscila Palazzo. Rodando o Brasil, treinando licenciadas e acompanhando paciente atrás de paciente, entendi uma coisa que mudou meu trabalho pra sempre.</p>
+
+        <p style="font-family:var(--font-serif);font-size:1.2rem;font-style:italic;color:var(--text);margin-top:24px;padding-left:20px;border-left:2px solid var(--gold);">Quem procura uma clínica de estética não compra procedimento. Compra a versão de si mesmo que quer voltar a ser.</p>
+
+        <p style="margin-top:24px;">De lá pra cá, é só clínica de estética. Facial, corporal, emagrecimento. Não atendo lojista, advogado, engenheiro. Não diversifico. É uma vertical exclusiva — porque é o único jeito de saber, sem chutar, qual oferta funciona pra botox em novembro, qual gancho prende quem nunca fez procedimento.</p>
+
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-num">6</span>
+            <span class="stat-label">Anos de especialização</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">10</span>
+            <span class="stat-label">Anos em vendas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">1</span>
+            <span class="stat-label">Vertical exclusiva</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 5 — O SISTEMA
+══════════════════════════════════════════════════════════ -->
+<section id="sistema">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-tag">O método</span>
+      <h2>A maioria das agências entrega só uma parte do trabalho. E é por isso que não funciona.</h2>
+      <div class="line-draw"></div>
+    </div>
+
+    <div class="reveal mt-24" style="max-width:680px">
+      <p>A maioria das agências entrega anúncio. Só. Aí o anúncio gera mensagem, a mensagem cai no WhatsApp, ela responde "o valor é X, posso agendar?", o paciente some, e a culpa volta toda pro anúncio. Eu não trabalho assim.</p>
+    </div>
+
+    <div class="sistema-grid mt-56">
+      <div class="sistema-item tech-corners reveal" style="transition-delay:0.1s">
+        <div class="sistema-num">// 01 — Gestão de anúncios</div>
+        <h3>Estrutura pensada pra clínica de estética</h3>
+        <p>Ofertas que filtram curioso, criativos pensados pra prender atenção nos primeiros segundos, públicos definidos com cuidado pra evitar mensagem de gente fora do perfil. Tudo testado em clínica de verdade, não em curso de gestor.</p>
+      </div>
+      <div class="sistema-item tech-corners reveal" style="transition-delay:0.2s">
+        <div class="sistema-num">// 02 — Copy no tom da profissional</div>
+        <h3>Anúncio que parece ter saído de você</h3>
+        <p>Não é texto pronto reciclado de outra clínica. Eu estudo como você fala, como o seu paciente fala, e escrevo copy que soa autêntica. É o que faz a pessoa chamar você, e não a clínica concorrente.</p>
+      </div>
+      <div class="sistema-item tech-corners reveal" style="transition-delay:0.3s">
+        <div class="sistema-num">// 03 — Script comercial personalizado</div>
+        <h3>Fluxograma de atendimento para sua clínica</h3>
+        <p>Pergunta certa na hora certa. Como sair da armadilha do "qual o valor?". Como conduzir a conversa sem parecer robô. Como fazer a pessoa querer agendar antes mesmo de saber o preço.</p>
+      </div>
+      <div class="sistema-item tech-corners reveal" style="transition-delay:0.4s">
+        <div class="sistema-num">// 04 — Treinamento comercial</div>
+        <h3>Ao vivo, com script aberto, com casos reais</h3>
+        <p>Eu sento com a pessoa que atende o WhatsApp da sua clínica e treino. Não mando PDF, não mando vídeo gravado. Treino ao vivo. Porque adianta pouco o anúncio funcionar se quem responde derruba a venda.</p>
+      </div>
+    </div>
+
+    <div class="sistema-connector reveal mt-40">
+      <p><strong>Anúncio + copy + script + treinamento operando junto.</strong> Tirar qualquer uma dessas peças é entregar metade da solução.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 6 — REFORÇO
+══════════════════════════════════════════════════════════ -->
+<section id="reforco">
+  <div class="container">
+    <div class="reforco-layout">
+
+      <div class="reveal-left">
+        <div class="reforco-visual">
+          <div class="tech-circle"></div>
+          <div class="tech-circle"></div>
+          <div class="tech-circle"></div>
+          <div class="tech-center">
+            <span class="tech-center-num">Prev.</span>
+            <span class="tech-center-label">Previsibilidade<br>de faturamento</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal-right">
+        <span class="section-tag">O que muda</span>
+        <h2>Você não precisa de mais alcance. Precisa de previsibilidade.</h2>
+        <div class="line-draw"></div>
+
+        <p>Sua clínica tem aluguel pra pagar. Tem equipe que depende de você no fim do mês. Tem equipamento, licença, imposto, fornecedor. E nada disso espera o orgânico engrenar.</p>
+
+        <p>O que não deu certo foi o jeito como foi feito. Anúncio sem oferta clara, criativo fraco, público errado, atendimento despreparado — nada disso ia funcionar mesmo.</p>
+
+        <p>Quando o sistema é montado do jeito certo, a clínica para de depender de sorte. Você passa a saber, mais ou menos, quanta conversa vai entrar por semana, quanto disso vira agendamento e quanto disso vira faturamento. E é só com previsibilidade que dá pra crescer sem aperto.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 7 — FILTRO
+══════════════════════════════════════════════════════════ -->
+<section id="filtro">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="reveal">
+      <span class="section-tag">Seleção</span>
+      <h2>Esse trabalho não é pra toda clínica. E tudo bem.</h2>
+      <div class="line-draw"></div>
+    </div>
+
+    <div class="filtro-layout">
+      <div class="filtro-col reveal-left">
+        <div class="filtro-col-label">Não consigo ajudar quem...</div>
+        <ul class="filtro-list">
+          <li>Está procurando solução mágica de 7 dias</li>
+          <li>Demora horas pra responder no WhatsApp e quer culpar o anúncio</li>
+          <li>Não está disposto a gravar criativo</li>
+          <li>Não quer ajustar a forma como atende</li>
+          <li>Vê marketing como custo, não como investimento</li>
+        </ul>
+      </div>
+      <div class="filtro-col reveal-right">
+        <div class="filtro-col-label">Trabalho bem com quem...</div>
+        <ul class="filtro-list">
+          <li>Entende que clínica é negócio</li>
+          <li>Sabe que atender bem é parte da venda</li>
+          <li>Está aberto a ajustar oferta e gravar conteúdo</li>
+          <li>Quer treinar a equipe de atendimento</li>
+          <li>Busca resultado consistente, não viral</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-closing reveal" style="border-top-color:rgba(201,169,110,0.12)">
+      <p style="color:rgba(242,237,232,0.65)">Se você é dessa segunda turma, eu provavelmente sou a pessoa certa pra te ajudar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     DOBRA 8 — CTA FINAL
+══════════════════════════════════════════════════════════ -->
+<section id="cta-final">
+  <div class="reveal">
+    <span class="section-tag" style="display:block;text-align:center;margin-bottom:48px">Próximo passo</span>
+    <div class="cta-card tech-corners">
+      <div class="cta-orb"></div>
+
+      <h2>Antes de qualquer proposta, vamos conversar.</h2>
+
+      <div class="cta-divider"></div>
+
+      <p>Eu não vendo pacote por formulário. Não mando proposta de PDF pra quem nunca conversou comigo. Antes de qualquer coisa, eu prefiro entender em que ponto sua clínica está hoje.</p>
+
+      <p style="margin-top:20px;">O próximo passo pode ser uma conversa rápida no WhatsApp, pra eu entender seu cenário, ou uma call de diagnóstico de 30 minutos, onde a gente olha junto seus anúncios, sua oferta e seu atendimento. Sem custo, sem compromisso de fechar nada.</p>
+
+      <p style="margin-top:20px;">Se fizer sentido pros dois lados, a gente conversa sobre trabalhar junto. Se não fizer, você sai com 3 ou 4 ajustes que pode aplicar na semana.</p>
+
+      <div class="cta-btns">
+        <a href="https://wa.me/55SEUNUMERO?text=Ol%C3%A1%20Eduardo%2C%20quero%20conversar%20sobre%20minha%20cl%C3%ADnica" class="btn-primary" id="whats-cta-main" target="_blank" rel="noopener">
+          Quero conversar no WhatsApp
+        </a>
+        <a href="https://wa.me/55SEUNUMERO?text=Ol%C3%A1%20Eduardo%2C%20quero%20agendar%20uma%20call%20de%20diagn%C3%B3stico" class="btn-secondary" id="call-cta" target="_blank" rel="noopener">
+          Agendar call de diagnóstico (30 min)
+        </a>
+      </div>
+
+      <p class="cta-note">Atendimento direto comigo. A primeira conversa não é com vendedor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">Eduardo <span>Schuman</span></div>
+  <p>Tráfego especializado em clínicas de estética · Desde 2019</p>
+  <p style="color:rgba(156,144,137,0.2)">© 2025</p>
+</footer>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+/* ── NAV scroll ─────────────────────────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ── Scroll reveal ──────────────────────────────────────── */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .line-draw').forEach(el => {
+  revealObserver.observe(el);
+});
+
+/* ── Corner brackets injection ──────────────────────────── */
+document.querySelectorAll('.tech-corners').forEach(el => {
+  ['tl','tr','bl','br'].forEach(pos => {
+    const s = document.createElement('span');
+    s.className = `corner ${pos}`;
+    el.appendChild(s);
+  });
+});
+
+/* ── DIAGNOSTIC TOOL ────────────────────────────────────── */
+const PROBLEMS_BANK = [
+  {
+    title: "Copies longas demais para o feed",
+    desc: "Os anúncios têm textos extensos no corpo do post. No feed do Instagram e Facebook, o usuário não lê — para. A copy precisa prender em 2 linhas, não em 10."
+  },
+  {
+    title: "Ganchos fracos e previsíveis",
+    desc: "Os primeiros 3 segundos decidem tudo. Abertura que não quebra padrão, não provoca parada no scroll, não cria ruptura com o que o usuário estava vendo antes — perde a atenção antes de pedir qualquer coisa."
+  },
+  {
+    title: "Tom genérico de agência",
+    desc: "Frases como \"transformação 360°\" e \"corpo mais esculpido e definido revelado\" soam artificiais. Não é o jeito que a profissional fala. Perde autenticidade e cria distância com quem está lendo."
+  },
+  {
+    title: "Pouca exploração emocional da dor da paciente",
+    desc: "Os textos falam do procedimento, mas pouco sobre a dor emocional: o espelho que ela evita, a roupa que não fecha, o verão que ela odeia. Quem compra não compra técnica — compra resolução de algo que incomoda há tempo."
+  },
+  {
+    title: "Ausência de prova social humanizada",
+    desc: "\"Muitas pacientes\" é fraco. Um nome real e uma situação específica convertem muito mais. Sem história de paciente real, o anúncio não cria identificação nem urgência emocional."
+  },
+  {
+    title: "Sem senso de localidade ou pertencimento",
+    desc: "Quase nenhuma menção à cidade ou região nos copies visíveis. Isso é um diferencial que não está sendo aproveitado — cria conexão, reduz custo por lead e filtra público fora do raio de atendimento."
+  },
+  {
+    title: "Antes e depois subutilizado como argumento",
+    desc: "A imagem faz o trabalho visual, mas o texto não amplifica a emoção. O criativo mostra, mas a copy deveria conduzir: \"ela evitava o espelho há 3 meses\" converte mais do que \"resultado da paciente\"."
+  }
+];
+
+const PRIORITIES = [
+  { p: "Alta",  a: "Reescrever os ganchos dos vídeos — 3 segundos decidem tudo" },
+  { p: "Alta",  a: "Reduzir textos de legenda para máximo 3-4 linhas" },
+  { p: "Média", a: "Incluir localidade em pelo menos metade dos anúncios" },
+  { p: "Média", a: "Criar 1-2 anúncios com depoimento de paciente real (nome + situação)" },
+  { p: "Baixa", a: "Diversificar ângulos emocionais — verão, espelho, roupa, autoestima" },
+];
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function startDiagnosis() {
+  const nome    = document.getElementById('f-nome').value.trim();
+  const whats   = document.getElementById('f-whats').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const clinica = document.getElementById('f-clinica').value.trim() || '@suaclinica';
+
+  if (!nome || !whats || !email) {
+    alert('Preencha todos os campos para gerar o diagnóstico.');
+    return;
+  }
+
+  const handle = clinica.startsWith('@') ? clinica : '@' + clinica;
+
+  document.getElementById('form-state').style.display = 'none';
+  const analysisEl = document.getElementById('analysis-state');
+  analysisEl.style.display = 'block';
+  document.getElementById('clinic-label').textContent = handle;
+
+  const msg = encodeURIComponent(`Olá Eduardo, sou ${nome}. Acabei de fazer o diagnóstico da ${handle} e quero agendar uma call para saber mais.`);
+  const waUrl = `https://wa.me/55SEUNUMERO?text=${msg}`;
+  document.getElementById('whats-cta-hero').href = waUrl;
+
+  const percents = [18, 36, 55, 74, 100];
+  const fill = document.getElementById('progress-fill');
+
+  for (let i = 1; i <= 5; i++) {
+    const stepEl = document.getElementById(`step-${i}`);
+    stepEl.classList.add('active');
+    fill.style.width = percents[i-1] + '%';
+    await delay(700);
+    stepEl.classList.remove('active');
+    stepEl.classList.add('done');
+    stepEl.querySelector('.step-icon').textContent = '✓';
+  }
+
+  await delay(400);
+
+  let data;
+  try {
+    const resp = await fetch('/api/diagnostico', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handle, nome })
+    });
+    data = await resp.json();
+  } catch (e) {
+    data = { tipo: 'erro', mensagem: 'Não foi possível conectar ao servidor. Tente novamente.' };
+  }
+
+  analysisEl.style.display = 'none';
+  const resultEl = document.getElementById('result-state');
+
+  if (data.tipo === 'sem_anuncios') {
+    document.getElementById('problems-list').innerHTML = `
+      <div class="problem-item">
+        <div class="problem-num">// AVISO</div>
+        <div class="problem-title">Nenhum anúncio ativo encontrado</div>
+        <div class="problem-desc">${data.mensagem}</div>
+      </div>`;
+    document.getElementById('priority-table').innerHTML = '';
+  } else if (data.tipo === 'erro' || data.erro) {
+    document.getElementById('problems-list').innerHTML = `
+      <div class="problem-item">
+        <div class="problem-num">// ERRO</div>
+        <div class="problem-title">Não foi possível gerar o diagnóstico</div>
+        <div class="problem-desc">${data.mensagem || data.erro || 'Erro desconhecido.'}</div>
+      </div>`;
+    document.getElementById('priority-table').innerHTML = '';
+  } else {
+    if (data.pagina) document.getElementById('clinic-label').textContent = data.pagina;
+    document.getElementById('problems-list').innerHTML = (data.problemas || []).map((p, i) => `
+      <div class="problem-item">
+        <div class="problem-num">// PROBLEMA ${String(i+1).padStart(2,'0')}</div>
+        <div class="problem-title">${p.titulo}</div>
+        <div class="problem-desc">${p.descricao}</div>
+      </div>`).join('');
+    document.getElementById('priority-table').innerHTML = `
+      <thead><tr><th>Prioridade</th><th>Ação recomendada</th></tr></thead>
+      <tbody>${(data.prioridades || []).map(r => `<tr><td>${r.nivel}</td><td>${r.acao}</td></tr>`).join('')}</tbody>`;
+  }
+
+  resultEl.style.display = 'block';
+  resultEl.style.opacity = '0';
+  resultEl.style.transition = 'opacity 0.6s ease';
+  setTimeout(() => { resultEl.style.opacity = '1'; }, 50);
+}
+
+/* ── Substitua 55SEUNUMERO pelo seu número real, ex: 5547999999999 ── */
+</script>
+
+</body>
+</html>
