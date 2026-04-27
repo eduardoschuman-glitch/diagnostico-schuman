@@ -61,6 +61,7 @@ module.exports = async (req, res) => {
     debug.searchApiKeys = Object.keys(searchData);
     debug.searchApiError = searchData.error || null;
     debug.adsFound = (searchData.ads || []).length;
+    debug.firstAdRaw = searchData.ads?.[0] || null;
 
     const ads = searchData.ads || [];
     if (ads.length > 0) {
