@@ -1,5 +1,19 @@
-// v6 - estrutura correta SearchAPI: snapshot.body.text + two-step sem Graph API
+// v7 - busca por variações do handle e escolhe melhor resultado
 const Anthropic = require('@anthropic-ai/sdk');
+
+async function searchByTerm(term, apiKey) {
+  const url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&q=${encodeURIComponent(term)}&search_type=page&ad_type=all&country=ALL&api_key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.ads || [];
+}
+
+async function searchByPageId(pageId, apiKey) {
+  const url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.ads || [];
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,72 +28,79 @@ module.exports = async (req, res) => {
 
   const slug = handle.replace('@', '').trim();
 
-  let resumoAnuncios = null;
-  let totalAnuncios = 0;
+  // Gera variações do handle para ampliar a busca
+  const slugSemPonto = slug.replace(/\./g, '');          // draaline.garcia → draalinegarcia
+  const slugComEspaco = slug.replace(/\./g, ' ');        // draaline.garcia → draaline garcia
+  const slugComHifen = slug.replace(/\./g, '-');         // draaline.garcia → draaline-garcia
+
+  let melhorAds = [];
   let paginaEncontrada = `@${slug}`;
 
   try {
     const apiKey = process.env.SEARCHAPI_KEY;
 
-    // Passo 1: busca por nome para descobrir o page_id
-    const step1Url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&q=${encodeURIComponent(slug)}&search_type=page&ad_type=all&country=ALL&api_key=${apiKey}`;
-    const step1Res = await fetch(step1Url);
-    const step1Data = await step1Res.json();
+    // Testa todas as variações e coleta os page_ids encontrados
+    const termos = [...new Set([slug, slugSemPonto, slugComEspaco, slugComHifen])];
+    const pageIdsTestados = new Set();
+    let candidatos = []; // { pageId, pageName, ads }
 
-    let ads = step1Data.ads || [];
-    const pageId = ads[0]?.page_id || null;
-
-    if (pageId) {
-      // Passo 2: busca todos os anúncios pelo page_id (mais completo)
-      const step2Url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${apiKey}`;
-      const step2Res = await fetch(step2Url);
-      const step2Data = await step2Res.json();
-      if ((step2Data.ads || []).length > 0) {
-        ads = step2Data.ads;
+    for (const termo of termos) {
+      const ads = await searchByTerm(termo, apiKey);
+      for (const ad of ads) {
+        const pid = ad.page_id;
+        if (pid && !pageIdsTestados.has(pid)) {
+          pageIdsTestados.add(pid);
+          // Busca todos os anuncios desse page_id
+          const todosAds = await searchByPageId(pid, apiKey);
+          const count = todosAds.length || ads.filter(a => a.page_id === pid).length;
+          candidatos.push({
+            pageId: pid,
+            pageName: ad.page_name || ad.snapshot?.page_name || `@${slug}`,
+            ads: todosAds.length > 0 ? todosAds : ads.filter(a => a.page_id === pid)
+          });
+        }
       }
     }
 
-    if (ads.length > 0) {
-      // Pega o nome da página do primeiro anúncio
-      paginaEncontrada = ads[0].page_name || ads[0].snapshot?.page_name || `@${slug}`;
-      totalAnuncios = ads.length;
-
-      resumoAnuncios = ads.slice(0, 15).map((ad, i) => {
-        // Texto principal: snapshot.body.text
-        const body = ad.snapshot?.body?.text
-          || ad.ad_creative_bodies?.join(' | ')
-          || ad.body || 'Sem texto';
-
-        // Título/CTA
-        const cta = ad.snapshot?.cta_text || '';
-        const caption = ad.snapshot?.caption || '';
-        const linkUrl = ad.snapshot?.link_url || '';
-
-        // Formato e plataformas
-        const format = ad.snapshot?.display_format || '';
-        const platforms = ad.publisher_platform?.join(', ') || ad.publisher_platforms?.join(', ') || '';
-        const startDate = ad.start_date || ad.ad_delivery_start_time || '';
-
-        return `ANUNCIO ${i + 1}
-Plataformas: ${platforms}
-Formato: ${format}
-Data inicio: ${startDate}
-Texto: ${body}
-CTA: ${cta}
-Destino: ${linkUrl || caption}`;
-      }).join('\n\n---\n\n');
+    // Escolhe o candidato com mais anúncios
+    if (candidatos.length > 0) {
+      candidatos.sort((a, b) => b.ads.length - a.ads.length);
+      const melhor = candidatos[0];
+      melhorAds = melhor.ads;
+      paginaEncontrada = melhor.pageName;
     }
   } catch (e) {
     console.error('Erro ao buscar anuncios:', e.message);
   }
 
-  if (!resumoAnuncios) {
+  if (melhorAds.length === 0) {
     return res.status(200).json({
       tipo: 'sem_anuncios',
       pagina: paginaEncontrada,
       mensagem: 'Nenhum anúncio ativo encontrado na Biblioteca de Anúncios da Meta para esta página.'
     });
   }
+
+  const totalAnuncios = melhorAds.length;
+
+  const resumoAnuncios = melhorAds.slice(0, 15).map((ad, i) => {
+    const body = ad.snapshot?.body?.text
+      || ad.ad_creative_bodies?.join(' | ')
+      || ad.body || 'Sem texto';
+    const cta = ad.snapshot?.cta_text || '';
+    const linkUrl = ad.snapshot?.link_url || ad.snapshot?.caption || '';
+    const format = ad.snapshot?.display_format || '';
+    const platforms = ad.publisher_platform?.join(', ') || ad.publisher_platforms?.join(', ') || '';
+    const startDate = ad.start_date || ad.ad_delivery_start_time || '';
+
+    return `ANUNCIO ${i + 1}
+Plataformas: ${platforms}
+Formato: ${format}
+Data inicio: ${startDate}
+Texto: ${body}
+CTA: ${cta}
+Destino: ${linkUrl}`;
+  }).join('\n\n---\n\n');
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
