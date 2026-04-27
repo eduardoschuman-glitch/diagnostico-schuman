@@ -1,4 +1,4 @@
-// v2 - SearchAPI.io integration
+// v3 - debug mode
 const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {
@@ -17,23 +17,34 @@ module.exports = async (req, res) => {
   let resumoAnuncios = null;
   let totalAnuncios = 0;
   let paginaEncontrada = `@${slug}`;
+  let debug = {};
 
   try {
     // Passo 1: resolve handle -> page_id via Graph API básica
     const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
+    debug.hasAppId = !!process.env.META_APP_ID;
+    debug.hasAppSecret = !!process.env.META_APP_SECRET;
+    debug.hasSearchApiKey = !!process.env.SEARCHAPI_KEY;
+
     const pageRes = await fetch(
       `https://graph.facebook.com/v21.0/${encodeURIComponent(slug)}?fields=id,name&access_token=${appToken}`
     );
     const pageData = await pageRes.json();
+    debug.pageData = pageData;
 
     if (pageData.id) {
       const pageId = pageData.id;
       paginaEncontrada = pageData.name || `@${slug}`;
+      debug.pageId = pageId;
 
       // Passo 2: busca anúncios via SearchAPI.io
       const searchUrl = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${process.env.SEARCHAPI_KEY}`;
       const searchRes = await fetch(searchUrl);
       const searchData = await searchRes.json();
+      debug.searchApiStatus = searchRes.status;
+      debug.searchApiKeys = Object.keys(searchData);
+      debug.searchApiError = searchData.error || null;
+      debug.adsFound = (searchData.ads || []).length;
 
       const ads = searchData.ads || [];
       if (ads.length > 0) {
@@ -43,27 +54,27 @@ module.exports = async (req, res) => {
           const title = ad.ad_creative_link_titles?.join(' | ') || ad.title || '';
           const platforms = ad.publisher_platforms?.join(', ') || ad.platforms?.join(', ') || '';
           const startDate = ad.ad_delivery_start_time || ad.start_date || '';
-          return `ANÚNCIO ${i + 1}\nPlataformas: ${platforms}\nData: ${startDate}\nTexto: ${body}\nTítulo: ${title}`;
+          return `ANUNCIO ${i + 1}\nPlataformas: ${platforms}\nData: ${startDate}\nTexto: ${body}\nTitulo: ${title}`;
         }).join('\n\n---\n\n');
       }
     }
   } catch (e) {
-    console.error('Erro ao buscar anúncios:', e.message);
+    debug.exception = e.message;
+    console.error('Erro ao buscar anuncios:', e.message);
   }
-
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-  let prompt;
 
   if (!resumoAnuncios) {
     return res.status(200).json({
       tipo: 'sem_anuncios',
       pagina: paginaEncontrada,
-      mensagem: 'Nenhum anúncio ativo encontrado na Biblioteca de Anúncios da Meta para esta página.'
+      mensagem: 'Nenhum anuncio ativo encontrado na Biblioteca de Anuncios da Meta para esta pagina.',
+      debug
     });
   }
 
-  prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
 
 Analise os anúncios reais abaixo da clínica @${slug} (${paginaEncontrada}) e gere um diagnóstico profissional e personalizado.
 
