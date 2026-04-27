@@ -55,8 +55,15 @@ module.exports = async (req, res) => {
 
   let prompt;
 
-  if (resumoAnuncios) {
-    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
+  if (!resumoAnuncios) {
+    return res.status(200).json({
+      tipo: 'sem_anuncios',
+      pagina: paginaEncontrada,
+      mensagem: 'Nenhum anúncio ativo encontrado na Biblioteca de Anúncios da Meta para esta página.'
+    });
+  }
+
+  prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
 
 Analise os anúncios reais abaixo da clínica @${slug} (${paginaEncontrada}) e gere um diagnóstico profissional e personalizado.
 
@@ -81,31 +88,6 @@ RESPONDA APENAS COM ESTE JSON (sem markdown, sem \`\`\`):
     { "nivel": "Alta", "acao": "ação recomendada" }
   ]
 }`;
-  } else {
-    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor.
-
-A clínica @${slug} solicitou um diagnóstico. Não foi possível acessar os anúncios específicos dela, mas com base na sua experiência com dezenas de clínicas de estética, gere um diagnóstico dos erros mais comuns nesse mercado.
-
-INSTRUÇÕES:
-- Escreva diretamente para o gestor da clínica
-- Identifique entre 5 e 6 problemas reais e frequentes em clínicas de estética
-- Para cada problema, dê um exemplo concreto de como esse erro aparece nos anúncios
-- Não diga que analisou os anúncios específicos da clínica
-- Seja direto, técnico, sem enrolação
-- No final, gere uma tabela de prioridades com 5 ações concretas
-
-RESPONDA APENAS COM ESTE JSON (sem markdown, sem \`\`\`):
-{
-  "pagina": "@${slug}",
-  "total_anuncios": 0,
-  "problemas": [
-    { "numero": 1, "titulo": "título curto do problema", "descricao": "explicação detalhada com exemplo concreto de como esse erro aparece em anúncios de clínicas de estética" }
-  ],
-  "prioridades": [
-    { "nivel": "Alta", "acao": "ação recomendada e específica para clínicas de estética" }
-  ]
-}`;
-  }
 
   try {
     const message = await anthropic.messages.create({
