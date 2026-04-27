@@ -1,4 +1,4 @@
-// v5 - busca por nome no SearchAPI.io como fallback
+// v6 - estrutura correta SearchAPI: snapshot.body.text + two-step sem Graph API
 const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {
@@ -17,69 +17,59 @@ module.exports = async (req, res) => {
   let resumoAnuncios = null;
   let totalAnuncios = 0;
   let paginaEncontrada = `@${slug}`;
-  let debug = {};
 
   try {
-    // Passo 1: tenta resolver handle -> page_id via Graph API
-    let pageId = null;
-    const userToken = process.env.META_ACCESS_TOKEN;
-    const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
-    const token = userToken || appToken;
+    const apiKey = process.env.SEARCHAPI_KEY;
 
-    try {
-      const pageRes = await fetch(
-        `https://graph.facebook.com/v21.0/${encodeURIComponent(slug)}?fields=id,name&access_token=${token}`
-      );
-      const pageData = await pageRes.json();
-      debug.pageData = pageData;
+    // Passo 1: busca por nome para descobrir o page_id
+    const step1Url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&q=${encodeURIComponent(slug)}&search_type=page&ad_type=all&country=ALL&api_key=${apiKey}`;
+    const step1Res = await fetch(step1Url);
+    const step1Data = await step1Res.json();
 
-      if (pageData.id) {
-        pageId = pageData.id;
-        paginaEncontrada = pageData.name || `@${slug}`;
-        debug.pageId = pageId;
-      } else {
-        debug.graphApiError = pageData.error?.message || 'sem id';
-      }
-    } catch (e) {
-      debug.graphApiException = e.message;
-    }
+    let ads = step1Data.ads || [];
+    const pageId = ads[0]?.page_id || null;
 
-    // Passo 2: busca anúncios via SearchAPI.io
-    // Se tiver page_id, usa ele (mais preciso). Se não, busca pelo handle como search_term
-    let searchUrl;
     if (pageId) {
-      searchUrl = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${process.env.SEARCHAPI_KEY}`;
-      debug.searchMode = 'page_id';
-    } else {
-      searchUrl = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&q=${encodeURIComponent(slug)}&search_type=page&ad_type=all&country=ALL&api_key=${process.env.SEARCHAPI_KEY}`;
-      debug.searchMode = 'search_term';
+      // Passo 2: busca todos os anúncios pelo page_id (mais completo)
+      const step2Url = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${apiKey}`;
+      const step2Res = await fetch(step2Url);
+      const step2Data = await step2Res.json();
+      if ((step2Data.ads || []).length > 0) {
+        ads = step2Data.ads;
+      }
     }
 
-    const searchRes = await fetch(searchUrl);
-    const searchData = await searchRes.json();
-    debug.searchApiStatus = searchRes.status;
-    debug.searchApiKeys = Object.keys(searchData);
-    debug.searchApiError = searchData.error || null;
-    debug.adsFound = (searchData.ads || []).length;
-    debug.firstAdRaw = searchData.ads?.[0] || null;
-
-    const ads = searchData.ads || [];
     if (ads.length > 0) {
+      // Pega o nome da página do primeiro anúncio
+      paginaEncontrada = ads[0].page_name || ads[0].snapshot?.page_name || `@${slug}`;
       totalAnuncios = ads.length;
-      // Se buscamos por nome, pega o nome da página do primeiro anúncio
-      if (!pageId && ads[0].page_name) {
-        paginaEncontrada = ads[0].page_name;
-      }
+
       resumoAnuncios = ads.slice(0, 15).map((ad, i) => {
-        const body = ad.ad_creative_bodies?.join(' | ') || ad.body || ad.description || 'Sem texto';
-        const title = ad.ad_creative_link_titles?.join(' | ') || ad.title || '';
-        const platforms = ad.publisher_platforms?.join(', ') || ad.platforms?.join(', ') || '';
-        const startDate = ad.ad_delivery_start_time || ad.start_date || '';
-        return `ANUNCIO ${i + 1}\nPlataformas: ${platforms}\nData: ${startDate}\nTexto: ${body}\nTitulo: ${title}`;
+        // Texto principal: snapshot.body.text
+        const body = ad.snapshot?.body?.text
+          || ad.ad_creative_bodies?.join(' | ')
+          || ad.body || 'Sem texto';
+
+        // Título/CTA
+        const cta = ad.snapshot?.cta_text || '';
+        const caption = ad.snapshot?.caption || '';
+        const linkUrl = ad.snapshot?.link_url || '';
+
+        // Formato e plataformas
+        const format = ad.snapshot?.display_format || '';
+        const platforms = ad.publisher_platform?.join(', ') || ad.publisher_platforms?.join(', ') || '';
+        const startDate = ad.start_date || ad.ad_delivery_start_time || '';
+
+        return `ANUNCIO ${i + 1}
+Plataformas: ${platforms}
+Formato: ${format}
+Data inicio: ${startDate}
+Texto: ${body}
+CTA: ${cta}
+Destino: ${linkUrl || caption}`;
       }).join('\n\n---\n\n');
     }
   } catch (e) {
-    debug.exception = e.message;
     console.error('Erro ao buscar anuncios:', e.message);
   }
 
@@ -87,8 +77,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       tipo: 'sem_anuncios',
       pagina: paginaEncontrada,
-      mensagem: 'Nenhum anuncio ativo encontrado na Biblioteca de Anuncios da Meta para esta pagina.',
-      debug
+      mensagem: 'Nenhum anúncio ativo encontrado na Biblioteca de Anúncios da Meta para esta página.'
     });
   }
 
