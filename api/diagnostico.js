@@ -12,17 +12,17 @@ module.exports = async (req, res) => {
   if (!handle) return res.status(400).json({ error: 'Handle não informado' });
 
   const slug = handle.replace('@', '').trim();
-  const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
+  const accessToken = process.env.META_ACCESS_TOKEN || `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
 
   try {
-    const metaUrl = `https://graph.facebook.com/v19.0/ads_archive?` +
+    const metaUrl = `https://graph.facebook.com/v21.0/ads_archive?` +
       `search_terms=${encodeURIComponent(slug)}` +
       `&ad_type=ALL` +
       `&ad_reached_countries=BR` +
       `&ad_active_status=ACTIVE` +
       `&fields=id,ad_creation_time,ad_creative_bodies,ad_creative_link_titles,ad_creative_link_descriptions,page_name,publisher_platforms` +
       `&limit=20` +
-      `&access_token=${appToken}`;
+      `&access_token=${accessToken}`;
 
     const metaRes = await fetch(metaUrl);
     const metaData = await metaRes.json();
