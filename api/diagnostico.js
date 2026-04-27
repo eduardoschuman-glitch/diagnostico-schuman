@@ -23,51 +23,49 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
-  const { handle, nome } = req.body;
+  const { handle, nome, page_id: pageIdDireto, page_nome: pageNomeDireto } = req.body;
   if (!handle) return res.status(400).json({ error: 'Handle não informado' });
 
   const slug = handle.replace('@', '').trim();
 
-  // Gera variações do handle para ampliar a busca
-  const slugSemPonto = slug.replace(/\./g, '');          // draaline.garcia → draalinegarcia
-  const slugComEspaco = slug.replace(/\./g, ' ');        // draaline.garcia → draaline garcia
-  const slugComHifen = slug.replace(/\./g, '-');         // draaline.garcia → draaline-garcia
-
   let melhorAds = [];
-  let paginaEncontrada = `@${slug}`;
+  let paginaEncontrada = pageNomeDireto || `@${slug}`;
 
   try {
     const apiKey = process.env.SEARCHAPI_KEY;
 
-    // Testa todas as variações e coleta os page_ids encontrados
-    const termos = [...new Set([slug, slugSemPonto, slugComEspaco, slugComHifen])];
-    const pageIdsTestados = new Set();
-    let candidatos = []; // { pageId, pageName, ads }
+    if (pageIdDireto) {
+      // Usuário selecionou da lista — usa page_id diretamente
+      melhorAds = await searchByPageId(pageIdDireto, apiKey);
+    } else {
+      // Busca por variações do handle
+      const slugSemPonto = slug.replace(/\./g, '');
+      const slugComEspaco = slug.replace(/\./g, ' ');
+      const slugComHifen = slug.replace(/\./g, '-');
+      const termos = [...new Set([slug, slugSemPonto, slugComEspaco, slugComHifen])];
+      const pageIdsTestados = new Set();
+      let candidatos = [];
 
-    for (const termo of termos) {
-      const ads = await searchByTerm(termo, apiKey);
-      for (const ad of ads) {
-        const pid = ad.page_id;
-        if (pid && !pageIdsTestados.has(pid)) {
-          pageIdsTestados.add(pid);
-          // Busca todos os anuncios desse page_id
-          const todosAds = await searchByPageId(pid, apiKey);
-          const count = todosAds.length || ads.filter(a => a.page_id === pid).length;
-          candidatos.push({
-            pageId: pid,
-            pageName: ad.page_name || ad.snapshot?.page_name || `@${slug}`,
-            ads: todosAds.length > 0 ? todosAds : ads.filter(a => a.page_id === pid)
-          });
+      for (const termo of termos) {
+        const ads = await searchByTerm(termo, apiKey);
+        for (const ad of ads) {
+          const pid = ad.page_id;
+          if (pid && !pageIdsTestados.has(pid)) {
+            pageIdsTestados.add(pid);
+            const todosAds = await searchByPageId(pid, apiKey);
+            candidatos.push({
+              pageName: ad.page_name || ad.snapshot?.page_name || `@${slug}`,
+              ads: todosAds.length > 0 ? todosAds : ads.filter(a => a.page_id === pid)
+            });
+          }
         }
       }
-    }
 
-    // Escolhe o candidato com mais anúncios
-    if (candidatos.length > 0) {
-      candidatos.sort((a, b) => b.ads.length - a.ads.length);
-      const melhor = candidatos[0];
-      melhorAds = melhor.ads;
-      paginaEncontrada = melhor.pageName;
+      if (candidatos.length > 0) {
+        candidatos.sort((a, b) => b.ads.length - a.ads.length);
+        melhorAds = candidatos[0].ads;
+        paginaEncontrada = candidatos[0].pageName;
+      }
     }
   } catch (e) {
     console.error('Erro ao buscar anuncios:', e.message);
