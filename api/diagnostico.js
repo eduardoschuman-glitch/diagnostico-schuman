@@ -1,4 +1,4 @@
-// v3 - debug mode
+// v4 - usa META_ACCESS_TOKEN para resolver handle
 const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {
@@ -20,14 +20,15 @@ module.exports = async (req, res) => {
   let debug = {};
 
   try {
-    // Passo 1: resolve handle -> page_id via Graph API básica
+    // Passo 1: resolve handle -> page_id
+    // Usa META_ACCESS_TOKEN (user token) que tem permissão de leitura de páginas
+    const userToken = process.env.META_ACCESS_TOKEN;
     const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
-    debug.hasAppId = !!process.env.META_APP_ID;
-    debug.hasAppSecret = !!process.env.META_APP_SECRET;
-    debug.hasSearchApiKey = !!process.env.SEARCHAPI_KEY;
+    const token = userToken || appToken;
+    debug.tokenType = userToken ? 'user_token' : 'app_token';
 
     const pageRes = await fetch(
-      `https://graph.facebook.com/v21.0/${encodeURIComponent(slug)}?fields=id,name&access_token=${appToken}`
+      `https://graph.facebook.com/v21.0/${encodeURIComponent(slug)}?fields=id,name&access_token=${token}`
     );
     const pageData = await pageRes.json();
     debug.pageData = pageData;
