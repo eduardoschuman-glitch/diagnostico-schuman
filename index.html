@@ -876,8 +876,11 @@ footer p { font-family: var(--font-mono); font-size: 0.58rem; color: rgba(156,14
         </div>
         <div class="form-group" style="position:relative;">
           <label>@ da clínica que anuncia</label>
-          <input type="text" id="f-clinica" placeholder="@clinicaana" autocomplete="off" oninput="buscarSugestoes(this.value)">
+          <input type="text" id="f-clinica" placeholder="@clinicaana ou cole o link da Biblioteca de Anúncios" autocomplete="off" oninput="buscarSugestoes(this.value)">
           <div id="sugestoes-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:#1a1a1a; border:1px solid #444; border-radius:8px; z-index:999; margin-top:4px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+          <div style="font-size:11px; color:#888; margin-top:6px;">
+            Não achou? <a href="https://www.facebook.com/ads/library/?country=BR" target="_blank" style="color:#d4a857; text-decoration:underline;">Busque na Biblioteca de Anúncios</a> e cole o link aqui.
+          </div>
         </div>
 
         <button class="btn-primary" id="btn-diagnose" onclick="startDiagnosis()">
@@ -1345,7 +1348,20 @@ async function startDiagnosis() {
     return;
   }
 
-  const handle = clinica.startsWith('@') ? clinica : '@' + clinica;
+  // Detecta se o usuário colou um link da Biblioteca de Anúncios
+  let pageIdFinal = pageIdSelecionado;
+  let pageNomeFinal = pageNomeSelecionado;
+
+  if (clinica.includes('facebook.com/ads/library')) {
+    const matchPageId = clinica.match(/view_all_page_id=(\d+)/) || clinica.match(/page_id=(\d+)/);
+    if (matchPageId) {
+      pageIdFinal = matchPageId[1];
+    }
+  }
+
+  const handle = clinica.includes('facebook.com')
+    ? (pageNomeFinal || 'Página da clínica')
+    : (clinica.startsWith('@') ? clinica : '@' + clinica);
 
   document.getElementById('form-state').style.display = 'none';
   const analysisEl = document.getElementById('analysis-state');
@@ -1376,7 +1392,7 @@ async function startDiagnosis() {
     const resp = await fetch('/api/diagnostico', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ handle, nome, page_id: pageIdSelecionado, page_nome: pageNomeSelecionado })
+      body: JSON.stringify({ handle, nome, email, page_id: pageIdFinal, page_nome: pageNomeFinal })
     });
     data = await resp.json();
   } catch (e) {
