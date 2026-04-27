@@ -111,7 +111,8 @@ RESPONDA APENAS COM ESTE JSON:
       messages: [{ role: 'user', content: prompt }]
     });
 
-    const diagnostico = JSON.parse(message.content[0].text);
+    const raw = message.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const diagnostico = JSON.parse(raw);
     return res.status(200).json({ tipo: 'diagnostico', ...diagnostico });
   } catch (err) {
     console.error(err);
