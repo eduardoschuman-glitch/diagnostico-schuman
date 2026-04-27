@@ -13,39 +13,41 @@ module.exports = async (req, res) => {
 
   const slug = handle.replace('@', '').trim();
 
-  // Tenta buscar anúncios reais da Biblioteca da Meta
   let resumoAnuncios = null;
   let totalAnuncios = 0;
-  let paginaEncontrada = slug;
+  let paginaEncontrada = `@${slug}`;
 
   try {
-    const accessToken = process.env.META_ACCESS_TOKEN || `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
-    const metaUrl = `https://graph.facebook.com/v21.0/ads_archive?` +
-      `search_terms=${encodeURIComponent(slug)}` +
-      `&ad_type=ALL` +
-      `&ad_reached_countries=BR` +
-      `&ad_active_status=ACTIVE` +
-      `&fields=id,ad_creation_time,ad_creative_bodies,ad_creative_link_titles,ad_creative_link_descriptions,page_name,publisher_platforms` +
-      `&limit=20` +
-      `&access_token=${accessToken}`;
+    // Passo 1: resolve handle -> page_id via Graph API básica
+    const appToken = `${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`;
+    const pageRes = await fetch(
+      `https://graph.facebook.com/v21.0/${encodeURIComponent(slug)}?fields=id,name&access_token=${appToken}`
+    );
+    const pageData = await pageRes.json();
 
-    const metaRes = await fetch(metaUrl);
-    const metaData = await metaRes.json();
+    if (pageData.id) {
+      const pageId = pageData.id;
+      paginaEncontrada = pageData.name || `@${slug}`;
 
-    if (!metaData.error && metaData.data && metaData.data.length > 0) {
-      const ads = metaData.data;
-      totalAnuncios = ads.length;
-      paginaEncontrada = ads[0].page_name || slug;
-      resumoAnuncios = ads.map((ad, i) => {
-        const bodies = ad.ad_creative_bodies?.join(' | ') || 'Sem texto';
-        const titles = ad.ad_creative_link_titles?.join(' | ') || '';
-        const plataformas = ad.publisher_platforms?.join(', ') || '';
-        const data = ad.ad_creation_time ? new Date(ad.ad_creation_time).toLocaleDateString('pt-BR') : '';
-        return `ANÚNCIO ${i + 1}\nPágina: ${ad.page_name || slug}\nCriado em: ${data}\nPlataformas: ${plataformas}\nTexto: ${bodies}\nTítulo: ${titles}`;
-      }).join('\n\n---\n\n');
+      // Passo 2: busca anúncios via SearchAPI.io
+      const searchUrl = `https://www.searchapi.io/api/v1/search?engine=meta_ad_library&page_id=${pageId}&ad_type=all&country=ALL&api_key=${process.env.SEARCHAPI_KEY}`;
+      const searchRes = await fetch(searchUrl);
+      const searchData = await searchRes.json();
+
+      const ads = searchData.ads || [];
+      if (ads.length > 0) {
+        totalAnuncios = ads.length;
+        resumoAnuncios = ads.slice(0, 15).map((ad, i) => {
+          const body = ad.ad_creative_bodies?.join(' | ') || ad.body || ad.description || 'Sem texto';
+          const title = ad.ad_creative_link_titles?.join(' | ') || ad.title || '';
+          const platforms = ad.publisher_platforms?.join(', ') || ad.platforms?.join(', ') || '';
+          const startDate = ad.ad_delivery_start_time || ad.start_date || '';
+          return `ANÚNCIO ${i + 1}\nPlataformas: ${platforms}\nData: ${startDate}\nTexto: ${body}\nTítulo: ${title}`;
+        }).join('\n\n---\n\n');
+      }
     }
   } catch (e) {
-    // Falha silenciosa — usa diagnóstico por padrões
+    console.error('Erro ao buscar anúncios:', e.message);
   }
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -53,23 +55,23 @@ module.exports = async (req, res) => {
   let prompt;
 
   if (resumoAnuncios) {
-    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor.
+    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
 
-Analise os anúncios abaixo da clínica @${slug} e gere um diagnóstico profissional e personalizado.
+Analise os anúncios reais abaixo da clínica @${slug} (${paginaEncontrada}) e gere um diagnóstico profissional e personalizado.
 
-ANÚNCIOS ENCONTRADOS NA BIBLIOTECA DA META:
+ANÚNCIOS ATIVOS ENCONTRADOS (${totalAnuncios} anúncios):
 ${resumoAnuncios}
 
 INSTRUÇÕES:
 - Seja específico: cite o texto REAL dos anúncios ao apontar problemas
 - Identifique entre 4 e 7 problemas reais
-- Para cada problema, cite o trecho do anúncio que ilustra o problema
+- Para cada problema, cite o trecho exato do anúncio que ilustra o problema
 - Seja direto e técnico, sem enrolação
-- No final, gere uma tabela de prioridades com 5 ações
+- No final, gere uma tabela de prioridades com 5 ações concretas
 
-RESPONDA APENAS COM ESTE JSON:
+RESPONDA APENAS COM ESTE JSON (sem markdown, sem \`\`\`):
 {
-  "pagina": "nome da página encontrada",
+  "pagina": "${paginaEncontrada}",
   "total_anuncios": ${totalAnuncios},
   "problemas": [
     { "numero": 1, "titulo": "título curto do problema", "descricao": "explicação detalhada citando o texto real do anúncio" }
@@ -79,27 +81,27 @@ RESPONDA APENAS COM ESTE JSON:
   ]
 }`;
   } else {
-    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor. Sabe exatamente o que funciona e o que não funciona em anúncios para esse nicho.
+    prompt = `Você é Eduardo Schuman, especialista em tráfego pago exclusivamente para clínicas de estética há 6 anos. Antes do marketing, trabalhou 10 anos como vendedor.
 
-Uma clínica de estética com a página @${slug} solicitou um diagnóstico de tráfego. Com base na sua experiência profunda com clínicas de estética, gere um diagnóstico realista e detalhado com os problemas mais comuns que você encontra nesse tipo de negócio.
+A clínica @${slug} solicitou um diagnóstico. Não foi possível acessar os anúncios específicos dela, mas com base na sua experiência com dezenas de clínicas de estética, gere um diagnóstico dos erros mais comuns nesse mercado.
 
 INSTRUÇÕES:
-- Seja específico e técnico, como se estivesse falando com o gestor da clínica
+- Escreva diretamente para o gestor da clínica
 - Identifique entre 5 e 6 problemas reais e frequentes em clínicas de estética
-- Para cada problema, dê exemplos concretos de como esse erro aparece nos anúncios
-- Use linguagem direta, sem enrolação
+- Para cada problema, dê um exemplo concreto de como esse erro aparece nos anúncios
+- Não diga que analisou os anúncios específicos da clínica
+- Seja direto, técnico, sem enrolação
 - No final, gere uma tabela de prioridades com 5 ações concretas
-- Personalize mencionando @${slug} nos problemas para parecer específico
 
-RESPONDA APENAS COM ESTE JSON:
+RESPONDA APENAS COM ESTE JSON (sem markdown, sem \`\`\`):
 {
   "pagina": "@${slug}",
   "total_anuncios": 0,
   "problemas": [
-    { "numero": 1, "titulo": "título curto do problema", "descricao": "explicação detalhada e específica para clínicas de estética, com exemplo de como esse erro aparece nos anúncios" }
+    { "numero": 1, "titulo": "título curto do problema", "descricao": "explicação detalhada com exemplo concreto de como esse erro aparece em anúncios de clínicas de estética" }
   ],
   "prioridades": [
-    { "nivel": "Alta", "acao": "ação recomendada e específica" }
+    { "nivel": "Alta", "acao": "ação recomendada e específica para clínicas de estética" }
   ]
 }`;
   }
